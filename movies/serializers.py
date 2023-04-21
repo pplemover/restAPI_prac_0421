@@ -1,37 +1,56 @@
 from rest_framework import serializers
 from .models import Movie, Actor, Review
 
-        
-class MovieSerializer(serializers.ModelSerializer):
+class MovieTitle(serializers.ModelSerializer):
     class Meta:
         model = Movie
-        fields = '__all__'
-    
+        fields = ('title',)
+        
+class ActorSerializer(serializers.ModelSerializer):
+    movie = MovieTitle(many=True, read_only=True, source='movie_set')
+    class Meta:
+        model = Actor
+        fields = '__all__' 
+         
+
+class ActorNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Actor
+        fields = ('name',)
+
+           
+        
+class MovieSerializer(serializers.ModelSerializer):
+    actors = ActorNameSerializer(many=True, read_only=True)
+    class Meta:
+        model = Movie
+        fields = ('actors',)
+        
+
 class ActorListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
         fields = '__all__'
+
+
+              
         
-class ActorSerializer(serializers.ModelSerializer):
-    movie_set = MovieSerializer(many=True, read_only=True)
-    class Meta(ActorListSerializer.Meta):
-        model = Actor
-        fields = '__all__'
-    
-    # title 필드만 가져오기
-    # ?
+class MovieListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = ('title', 'overview')
+ 
 
-
-    # movie_set 이름을 movies로 바꾸기
-    # def to_representation(self, instance):
-    #     rep = super().to_representation(instance)
-    #     print(instance)
-    #     rep['movies'] = rep.pop('movie_set', [])
-    #     return rep
-
-
-class ReviewSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):   
+    movie = MovieTitle(many=False, read_only=True)
     class Meta:
         model = Review
         fields = '__all__'
+
+
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ('title', 'content')
         read_only_fields = ('movie',)
