@@ -8,7 +8,7 @@ from django.http.response import JsonResponse, HttpResponse
 from .models import Actor, Movie, Review
 
 from django.core import serializers
-from .serializers import ActorSerializer, MovieSerializer, ReviewSerializer
+from .serializers import ActorSerializer, MovieSerializer, ReviewSerializer, ActorListSerializer
 
 
 # Create your views here.
@@ -16,7 +16,7 @@ from .serializers import ActorSerializer, MovieSerializer, ReviewSerializer
 def actor_list(request):
     if request.method == 'GET':
         actors = get_list_or_404(Actor)
-        serializer = ActorSerializer(actors, many=True)
+        serializer = ActorListSerializer(actors, many=True)
         return Response(serializer.data) 
 
 @api_view(['GET',])
@@ -48,12 +48,20 @@ def review_list(request):
         serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data)
 
-@api_view(['GET',])
+@api_view(['GET','DELETE', 'PUT'])
 def review_detail(request, review_pk):
     review = get_object_or_404(Review, pk=review_pk)
     if request.method == 'GET':
         serializer = ReviewSerializer(review)
         return Response(serializer.data)
+    elif request.method == 'DELETE':
+        review.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    elif request.method == 'PUT':
+        serializer = ReviewSerializer(review, data=request.data)
+        if serializer.is_valid(raise_exception=True): 
+            serializer.save() 
+            return Response(serializer.data)
 
 @api_view(['POST'])
 def review_create(request, movie_pk):
