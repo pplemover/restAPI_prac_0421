@@ -1,4 +1,7 @@
 from django.db import models
+
+# Create your models here.
+from django.db import models
 from django.conf import settings
 
 # Create your models here.
@@ -6,6 +9,7 @@ class Actor(models.Model):
     name = models.CharField(max_length=100)
 
 class Movie(models.Model):
+    actors = models.ManyToManyField(Actor)
     title = models.CharField(max_length=100)
     overview = models.TextField()
     release_date = models.DateTimeField()
@@ -14,6 +18,4 @@ class Movie(models.Model):
 class Review(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
-    movie_id = models.ForeignKey(Movie, on_delete=models.CASCADE)
-    
-
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
